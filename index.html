@@ -643,17 +643,27 @@
             let betType, betTypeTitle, betTypeDetails;
             let worstProfit, bestProfit, worstOutcomes, bestOutcomes;
 
-            // Check if it's a true arbitrage (ranges cover everything with no gap)
-            const isArbitrage = !gapExists && !hasMiddle;
+            // Check if combined odds are profitable (implied prob < 100%)
+            const isProfitable = totalImplied < 1;
 
-            if (isArbitrage) {
-                betType = 'arbitrage';
-                betTypeTitle = 'TRUE ARBITRAGE';
-                betTypeDetails = 'Guaranteed profit regardless of outcome';
+            // Check if it's a true arbitrage structure (ranges cover everything with no gap)
+            const isArbStructure = !gapExists && !hasMiddle;
+
+            if (isArbStructure) {
                 worstProfit = Math.min(profitBet1Wins, profitBet2Wins);
                 bestProfit = Math.max(profitBet1Wins, profitBet2Wins);
                 worstOutcomes = 'One wins';
                 bestOutcomes = 'One wins';
+
+                if (isProfitable) {
+                    betType = 'arbitrage';
+                    betTypeTitle = 'TRUE ARBITRAGE';
+                    betTypeDetails = 'Guaranteed profit regardless of outcome';
+                } else {
+                    betType = 'gap'; // Use gap styling (red) for negative EV
+                    betTypeTitle = 'NEGATIVE EV';
+                    betTypeDetails = `Guaranteed loss of ${Math.abs(worstProfit).toFixed(2)} (${(totalImplied * 100).toFixed(1)}% implied)`;
+                }
             } else if (hasMiddle && !gapExists) {
                 betType = 'middle';
                 betTypeTitle = 'MIDDLE OPPORTUNITY';
@@ -712,7 +722,8 @@
 
             // Upside score (0-35): based on best case ROI
             // Use square root scaling for diminishing returns - allows high upside to still differentiate
-            let upsideScore = Math.sqrt(bestROI) * 2.2;
+            // Handle negative ROI (guaranteed loss) by clamping to 0
+            let upsideScore = bestROI > 0 ? Math.sqrt(bestROI) * 2.2 : 0;
             upsideScore = Math.round(Math.max(0, Math.min(35, upsideScore)));
 
             const totalScore = safetyScore + middleScore + upsideScore;
