@@ -721,9 +721,9 @@
             if (middleSize >= 4) middleScore = 30;
 
             // Upside score (0-35): based on best case ROI
-            // Use square root scaling for diminishing returns - allows high upside to still differentiate
-            // Handle negative ROI (guaranteed loss) by clamping to 0
-            let upsideScore = bestROI > 0 ? Math.sqrt(bestROI) * 2.2 : 0;
+            // Calibrated to realistic prop betting: 100% ROI (good middle hit) should score ~35
+            // sqrt scaling with multiplier 3.5 gives: 10%→11, 50%→25, 100%→35
+            let upsideScore = bestROI > 0 ? Math.sqrt(bestROI) * 3.5 : 0;
             upsideScore = Math.round(Math.max(0, Math.min(35, upsideScore)));
 
             const totalScore = safetyScore + middleScore + upsideScore;
