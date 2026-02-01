@@ -449,7 +449,7 @@
                         <div class="rating-bar-label tooltip-wrapper">
                             Safety
                             <div class="tooltip">
-                                <div class="tooltip-title">Safety Score (0-40)</div>
+                                <div class="tooltip-title">Safety Score (0-35)</div>
                                 Measures your worst-case scenario. Higher scores mean smaller potential losses or guaranteed profits. True arbitrage bets score highest here.
                             </div>
                         </div>
@@ -462,7 +462,7 @@
                         <div class="rating-bar-label tooltip-wrapper tooltip-middle">
                             Middle
                             <div class="tooltip">
-                                <div class="tooltip-title">Middle Score (0-35)</div>
+                                <div class="tooltip-title">Middle Score (0-30)</div>
                                 Measures the size of the "middle" range where both bets win. More outcomes in the middle = higher score. A 3-point middle scores better than a 1-point middle.
                             </div>
                         </div>
@@ -475,8 +475,8 @@
                         <div class="rating-bar-label tooltip-wrapper tooltip-upside">
                             Upside
                             <div class="tooltip">
-                                <div class="tooltip-title">Upside Score (0-25)</div>
-                                Measures your best-case profit potential. Higher scores mean bigger payouts when you hit the middle and win both bets.
+                                <div class="tooltip-title">Upside Score (0-35)</div>
+                                Measures your best-case profit potential. Uses diminishing returns scaling so high-upside bets still differentiate. Higher odds = higher score.
                             </div>
                         </div>
                         <div class="rating-bar-track">
@@ -690,29 +690,30 @@
             const worstROI = (worstProfit / totalStake) * 100;
             const bestROI = (bestProfit / totalStake) * 100;
 
-            // Safety score (0-40): based on worst case
+            // Safety score (0-35): based on worst case
             let safetyScore;
             if (worstROI >= 0) {
-                safetyScore = 30 + Math.min(10, worstROI * 2); // 30-40 for profitable
+                safetyScore = 25 + Math.min(10, worstROI * 2); // 25-35 for profitable
             } else if (worstROI >= -5) {
-                safetyScore = 20 + (5 + worstROI) * 2; // 20-30 for small loss
+                safetyScore = 15 + (5 + worstROI) * 2; // 15-25 for small loss
             } else if (worstROI >= -20) {
-                safetyScore = 5 + (20 + worstROI); // 5-20 for medium loss
+                safetyScore = (20 + worstROI); // 0-15 for medium loss
             } else {
-                safetyScore = Math.max(0, 5 + worstROI / 4); // 0-5 for big loss
+                safetyScore = Math.max(0, worstROI / 5); // negative for big loss
             }
-            safetyScore = Math.round(Math.max(0, Math.min(40, safetyScore)));
+            safetyScore = Math.round(Math.max(0, Math.min(35, safetyScore)));
 
-            // Middle score (0-35): based on middle opportunity size
+            // Middle score (0-30): based on middle opportunity size
             let middleScore = 0;
-            if (middleSize >= 1) middleScore = 15;
-            if (middleSize >= 2) middleScore = 25;
-            if (middleSize >= 3) middleScore = 30;
-            if (middleSize >= 4) middleScore = 35;
+            if (middleSize >= 1) middleScore = 12;
+            if (middleSize >= 2) middleScore = 20;
+            if (middleSize >= 3) middleScore = 25;
+            if (middleSize >= 4) middleScore = 30;
 
-            // Upside score (0-25): based on best case ROI
-            let upsideScore = Math.min(25, Math.max(0, bestROI * 1.5));
-            upsideScore = Math.round(upsideScore);
+            // Upside score (0-35): based on best case ROI
+            // Use square root scaling for diminishing returns - allows high upside to still differentiate
+            let upsideScore = Math.sqrt(bestROI) * 2.2;
+            upsideScore = Math.round(Math.max(0, Math.min(35, upsideScore)));
 
             const totalScore = safetyScore + middleScore + upsideScore;
 
@@ -734,11 +735,11 @@
             document.getElementById('ratingGrade').textContent = grade;
             document.getElementById('ratingGrade').className = 'rating-grade ' + gradeClass;
 
-            document.getElementById('safetyBar').style.width = (safetyScore / 40 * 100) + '%';
+            document.getElementById('safetyBar').style.width = (safetyScore / 35 * 100) + '%';
             document.getElementById('safetyValue').textContent = safetyScore;
-            document.getElementById('middleBar').style.width = (middleScore / 35 * 100) + '%';
+            document.getElementById('middleBar').style.width = (middleScore / 30 * 100) + '%';
             document.getElementById('middleValue').textContent = middleScore;
-            document.getElementById('upsideBar').style.width = (upsideScore / 25 * 100) + '%';
+            document.getElementById('upsideBar').style.width = (upsideScore / 35 * 100) + '%';
             document.getElementById('upsideValue').textContent = upsideScore;
 
             const indicator = document.getElementById('betTypeIndicator');
