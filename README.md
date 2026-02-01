@@ -41,22 +41,18 @@ EdgeLock helps you analyze betting opportunities where you can bet on both sides
 
 ## Usage
 
-1. Enter bet type (Over/Under), line, and decimal odds for both bets
-2. Enter your total stake
-3. View the rating, scenario type, and optimal stake distribution
+1. Toggle between **Decimal** and **American** odds format
+2. Enter bet type (Over/Under), line, and odds for both bets
+3. Enter your total stake
+4. View the rating, scenario type, and optimal stake distribution
 
-### Odds Conversion
+### Odds Format Toggle
 
-| American | Decimal |
-|----------|---------|
-| +110 | 2.10 |
-| -110 | 1.91 |
-| +200 | 3.00 |
-| -150 | 1.67 |
+Click the toggle to switch between:
+- **Decimal odds** (e.g., 2.10, 1.95)
+- **American odds** (e.g., +110, -110)
 
-Formula:
-- Positive American: `(odds / 100) + 1`
-- Negative American: `(100 / |odds|) + 1`
+Existing values automatically convert when you toggle.
 
 ## Local Development
 
@@ -64,4 +60,4 @@ Just open `index.html` in a browser. No build step required.
 
 ## License
 
-MIT
+CC BY-NC 4.0 - Free to use and modify for non-commercial purposes.

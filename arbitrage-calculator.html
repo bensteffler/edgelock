@@ -118,50 +118,6 @@
             margin-top: 4px;
         }
 
-        /* Odds Format Toggle */
-        .odds-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        .odds-toggle-label {
-            font-size: 0.85rem;
-            color: #888;
-            transition: color 0.2s;
-        }
-        .odds-toggle-label.active {
-            color: #4ade80;
-            font-weight: 600;
-        }
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 13px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: #4ade80;
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-        .toggle-switch.american::after {
-            transform: translateX(24px);
-        }
-
         /* Rating Section */
         .rating-card {
             background: linear-gradient(135deg, rgba(74,222,128,0.2) 0%, rgba(59,130,246,0.2) 100%);
@@ -425,12 +381,6 @@
             <p class="brand-tagline">Arbitrage & Middle Opportunity Calculator</p>
         </div>
 
-        <div class="odds-toggle">
-            <span class="odds-toggle-label active" id="decimalLabel">Decimal</span>
-            <div class="toggle-switch" id="oddsToggle"></div>
-            <span class="odds-toggle-label" id="americanLabel">American</span>
-        </div>
-
         <div class="card">
             <div class="card-title">Bet 1</div>
             <div class="bet-row">
@@ -446,11 +396,11 @@
                     <input type="number" id="bet1Line" step="0.5" placeholder="1.5">
                 </div>
                 <div class="input-group">
-                    <label id="bet1OddsLabel">Odds (Decimal)</label>
+                    <label>Odds (Decimal)</label>
                     <input type="number" id="bet1Odds" step="0.01" placeholder="2.10">
                 </div>
             </div>
-            <div class="odds-hint" id="bet1Hint">e.g., Over 1.5 assists @ 2.10</div>
+            <div class="odds-hint">e.g., Over 1.5 assists @ 2.10</div>
         </div>
 
         <div class="card">
@@ -468,11 +418,11 @@
                     <input type="number" id="bet2Line" step="0.5" placeholder="2.5">
                 </div>
                 <div class="input-group">
-                    <label id="bet2OddsLabel">Odds (Decimal)</label>
+                    <label>Odds (Decimal)</label>
                     <input type="number" id="bet2Odds" step="0.01" placeholder="1.95">
                 </div>
             </div>
-            <div class="odds-hint" id="bet2Hint">e.g., Under 2.5 assists @ 1.95</div>
+            <div class="odds-hint">e.g., Under 2.5 assists @ 1.95</div>
         </div>
 
         <div class="card">
@@ -595,93 +545,6 @@
     </div>
 
     <script>
-        // Odds format state
-        let isAmericanOdds = false;
-
-        // Conversion functions
-        function americanToDecimal(american) {
-            if (american >= 100) {
-                return (american / 100) + 1;
-            } else if (american <= -100) {
-                return (100 / Math.abs(american)) + 1;
-            }
-            return null; // Invalid American odds
-        }
-
-        function decimalToAmerican(decimal) {
-            if (decimal >= 2.0) {
-                return '+' + Math.round((decimal - 1) * 100);
-            } else if (decimal > 1.0) {
-                return Math.round(-100 / (decimal - 1));
-            }
-            return null;
-        }
-
-        // Get decimal odds from input (handles both formats)
-        function getDecimalOdds(inputId) {
-            const value = parseFloat(document.getElementById(inputId).value);
-            if (isNaN(value)) return NaN;
-            if (isAmericanOdds) {
-                return americanToDecimal(value);
-            }
-            return value;
-        }
-
-        // Toggle handler
-        document.getElementById('oddsToggle').addEventListener('click', function() {
-            const toggle = this;
-            const bet1Input = document.getElementById('bet1Odds');
-            const bet2Input = document.getElementById('bet2Odds');
-            const bet1Value = parseFloat(bet1Input.value);
-            const bet2Value = parseFloat(bet2Input.value);
-
-            isAmericanOdds = !isAmericanOdds;
-            toggle.classList.toggle('american', isAmericanOdds);
-
-            // Update labels
-            document.getElementById('decimalLabel').classList.toggle('active', !isAmericanOdds);
-            document.getElementById('americanLabel').classList.toggle('active', isAmericanOdds);
-
-            const oddsLabel = isAmericanOdds ? 'Odds (American)' : 'Odds (Decimal)';
-            document.getElementById('bet1OddsLabel').textContent = oddsLabel;
-            document.getElementById('bet2OddsLabel').textContent = oddsLabel;
-
-            // Update hints
-            if (isAmericanOdds) {
-                document.getElementById('bet1Hint').textContent = 'e.g., Over 1.5 assists @ +110';
-                document.getElementById('bet2Hint').textContent = 'e.g., Under 2.5 assists @ -110';
-                bet1Input.placeholder = '+110';
-                bet2Input.placeholder = '-110';
-                bet1Input.step = '1';
-                bet2Input.step = '1';
-            } else {
-                document.getElementById('bet1Hint').textContent = 'e.g., Over 1.5 assists @ 2.10';
-                document.getElementById('bet2Hint').textContent = 'e.g., Under 2.5 assists @ 1.95';
-                bet1Input.placeholder = '2.10';
-                bet2Input.placeholder = '1.95';
-                bet1Input.step = '0.01';
-                bet2Input.step = '0.01';
-            }
-
-            // Convert existing values
-            if (!isNaN(bet1Value)) {
-                if (isAmericanOdds) {
-                    bet1Input.value = decimalToAmerican(bet1Value);
-                } else {
-                    bet1Input.value = americanToDecimal(bet1Value)?.toFixed(2) || '';
-                }
-            }
-            if (!isNaN(bet2Value)) {
-                if (isAmericanOdds) {
-                    bet2Input.value = decimalToAmerican(bet2Value);
-                } else {
-                    bet2Input.value = americanToDecimal(bet2Value)?.toFixed(2) || '';
-                }
-            }
-
-            calculate();
-        });
-
         const inputs = ['bet1Type', 'bet1Line', 'bet1Odds', 'bet2Type', 'bet2Line', 'bet2Odds', 'totalStake'];
         inputs.forEach(id => {
             document.getElementById(id).addEventListener('input', calculate);
@@ -715,10 +578,10 @@
         function calculate() {
             const bet1Type = document.getElementById('bet1Type').value;
             const bet1Line = parseFloat(document.getElementById('bet1Line').value);
-            const bet1Odds = getDecimalOdds('bet1Odds');
+            const bet1Odds = parseFloat(document.getElementById('bet1Odds').value);
             const bet2Type = document.getElementById('bet2Type').value;
             const bet2Line = parseFloat(document.getElementById('bet2Line').value);
-            const bet2Odds = getDecimalOdds('bet2Odds');
+            const bet2Odds = parseFloat(document.getElementById('bet2Odds').value);
             const totalStake = parseFloat(document.getElementById('totalStake').value);
 
             const results = document.getElementById('results');
